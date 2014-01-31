@@ -1,0 +1,7 @@
+Part 1 explains the ElasticSearch cluster settings and getting started with ES.
+
+- Index, DocumentType, Nodes, Shard/Replica,
+- Creating/retrieving/updating/deleting documents
+- Schema mapping, Fields, Filters, Analyzers
+- Index aliasing, creating/deleting alias
+ 

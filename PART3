@@ -1,0 +1,9 @@
+This part covers making the search better.
+
+- Influencing the score, Boosting the documents etc. 
+- Using synonyms
+- Using Stopwords
+- Using word delimiters, protected words
+- Handling HTML content
+- Handling different language content
+- highlighting

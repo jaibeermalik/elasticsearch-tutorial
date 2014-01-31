@@ -1,0 +1,6 @@
+This part will include searching/querying the data, different types of query.
+
+- Simple query, fields to search, fields to return data
+- Basic queries (match, boolean, query string etc.)
+- More like this, fuzzy query
+- Boosting query, custom score query etc.  

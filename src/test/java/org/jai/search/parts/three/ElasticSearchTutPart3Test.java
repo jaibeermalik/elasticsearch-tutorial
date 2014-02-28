@@ -35,6 +35,7 @@ public class ElasticSearchTutPart3Test extends AbstractSearchJUnit4SpringContext
         //Change boosting factor of one product and see it is at top
         long newTopProductId = 23l;
         Product product = productQueryService.getProduct(config, newTopProductId);
+        product.getCategories().clear();
         assertEquals(newTopProductId/10000f, product.getBoostFactor(), 0);
         
         product.setBoostFactor(60f);
@@ -107,6 +108,8 @@ public class ElasticSearchTutPart3Test extends AbstractSearchJUnit4SpringContext
         for (Product product : searchProducts.getProducts())
         {
             Product productDoc = productQueryService.getProduct(config, product.getId());
+            //Clear out categories, as parent was not set properly..will cause issues in reindexing...ignoring as temp data.
+            productDoc.getCategories().clear();
             //set description in reverse order.
             productDoc.setDescription("Description " + j);
             indexProductData.indexProduct(config, productDoc);
@@ -137,6 +140,7 @@ public class ElasticSearchTutPart3Test extends AbstractSearchJUnit4SpringContext
         
         searchCriteria.query("query");
         Product product = productQueryService.getProduct(config, 1l);
+        product.getCategories().clear();
         ProductSearchResult searchProducts = productQueryService.searchProducts(searchCriteria);
         
         assertEquals(0, searchProducts.getTotalCount());
@@ -182,6 +186,7 @@ public class ElasticSearchTutPart3Test extends AbstractSearchJUnit4SpringContext
         String stopword = "however";
         searchCriteria.query(stopword);
         Product product = productQueryService.getProduct(config, 1l);
+        product.getCategories().clear();
         ProductSearchResult searchProducts = productQueryService.searchProducts(searchCriteria);
         
         assertEquals(0, searchProducts.getTotalCount());
@@ -215,6 +220,7 @@ public class ElasticSearchTutPart3Test extends AbstractSearchJUnit4SpringContext
         String htmlTag = "br";
         searchCriteria.query(htmlTag);
         Product product = productQueryService.getProduct(config, 1l);
+        product.getCategories().clear();
         ProductSearchResult searchProducts = productQueryService.searchProducts(searchCriteria);
         
         assertEquals(0, searchProducts.getTotalCount());

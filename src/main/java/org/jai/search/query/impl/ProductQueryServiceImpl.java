@@ -146,9 +146,11 @@ public class ProductQueryServiceImpl implements ProductQueryService
             product.setKeywords(getListFieldValueOrNull(getResponse.getField(SearchDocumentFieldName.KEYWORDS.getFieldName())));
             product.setPrice(BigDecimal.valueOf(Double.valueOf(getResponse.getField(SearchDocumentFieldName.PRICE.getFieldName()).getValue().toString())));
             product.setBoostFactor(Float.valueOf(getResponse.getField(SearchDocumentFieldName.BOOSTFACTOR.getFieldName()).getValue().toString()));
-            
-            for (Object ListOfMapValues : getResponse.getField(SearchDocumentFieldName.CATEGORIES_ARRAY.getFieldName()).getValues())
+            GetField catField = getResponse.getField(SearchDocumentFieldName.CATEGORIES_ARRAY.getFieldName());
+            if(catField !=null)
             {
+                for (Object ListOfMapValues : catField.getValues())
+                {
                     for (final java.util.Map.Entry<String, String> entry : ((Map<String, String>)ListOfMapValues).entrySet())
                     {
                         //Only main facet values should be set.key ending with a number.
@@ -156,6 +158,7 @@ public class ProductQueryServiceImpl implements ProductQueryService
                         {
                             product.addCategory(new Category(entry.getValue(), null, entry.getKey().split("\\.facet")[0]));
                         }
+                    }
                 }
             }
             

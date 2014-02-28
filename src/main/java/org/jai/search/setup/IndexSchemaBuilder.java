@@ -111,6 +111,9 @@ public class IndexSchemaBuilder
     public XContentBuilder getDocumentTypeMapping(ElasticSearchIndexConfig elasticSearchIndexConfig, String documentType, boolean parentRelationship) throws IOException
     {
         XContentBuilder builder =  jsonBuilder().prettyPrint().startObject().startObject(documentType);
+                
+        //disable dynamics mapping of fields
+        builder.field(ElasticSearchReservedWords.DYNAMIC.getText(), "strict");        
 
         if(documentType.equals(elasticSearchIndexConfig.getDocumentType()))
         {
@@ -131,8 +134,21 @@ public class IndexSchemaBuilder
         else if(documentType.equals(elasticSearchIndexConfig.getGroupDocumentType()))
         {
             builder.startObject(ElasticSearchReservedWords.PROPERTIES.getText());
-            //Let it be dynamic for now 
-        }else if(documentType.equals(elasticSearchIndexConfig.getPropertiesDocumentType()))
+            //Let it be dynamic for now
+            builder.startObject(SearchDocumentFieldName.TITLE.getFieldName())
+                        .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
+                        .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
+                        .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+                   .endObject()
+                   .startObject(SearchDocumentFieldName.DESCRIPTION.getFieldName())
+                       .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
+                       .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
+                       .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+                   .endObject()
+               ;
+            
+        }
+        else if(documentType.equals(elasticSearchIndexConfig.getPropertiesDocumentType()))
         {
           //Used for parent-child relationship
             if(parentRelationship)
@@ -152,12 +168,16 @@ public class IndexSchemaBuilder
                        .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
                    .endObject();
         }
-        else
-        {
-            builder.startObject(ElasticSearchReservedWords.PROPERTIES.getText());
-        }
+//        else
+//        {
+//            builder.startObject(ElasticSearchReservedWords.PROPERTIES.getText());
+//        }
         
-        builder.endObject();
+        //end properties
+        builder.endObject()
+        //end two start ones
+//            .endObject()
+            .endObject();
         
         logger.debug("Generated mapping for document type {} is: {}", new Object[]{elasticSearchIndexConfig, builder.prettyPrint().string()});
         return builder;
@@ -244,34 +264,25 @@ public class IndexSchemaBuilder
                              int hierarchyLevel = SearchFacetName.getSupportedFacetParentChildHierarchyLevel();
                              for (int i = 1; i <= hierarchyLevel; i++)
                              {
-                                 builder.startObject(facetName.getFacetSequencedFieldNameAtLevel(i))
+                                 builder
+                                 .startObject(facetName.getFacetSequencedFieldNameAtLevel(i))
                                              .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
                                              .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
                                          .endObject()
-                                        .startObject(facetName.getFacetFieldNameAtLevel(i))
-                                            .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.MULTI_FIELD.getText())
-                                            .startObject(ElasticSearchReservedWords.FIELDS.getText())
-                                                .startObject(facetName.getFacetFieldNameAtLevel(i))
-                                                    .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                                                    .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
-                                                    .field(ElasticSearchReservedWords.ANALYZER.getText(), elasticSearchIndexConfig.getCustomFacetAnalyzerName())
-                                                .endObject()
-                                                .startObject(SearchDocumentFieldName.FACET.getFieldName())
+                                                .startObject(facetName.getFacetFieldNameAtLevel(i) + "." + SearchDocumentFieldName.FACET.getFieldName())
                                                     .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
                                                     .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
                                                     .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
                                                 .endObject()
-                                                .startObject(SearchDocumentFieldName.FACETFILTER.getFieldName())
+                                                .startObject(facetName.getFacetFieldNameAtLevel(i) + "." + SearchDocumentFieldName.FACETFILTER.getFieldName())
                                                     .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
                                                     .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
                                                 .endObject()
-                                                .startObject(SearchDocumentFieldName.SUGGEST.getFieldName())
+                                                .startObject(facetName.getFacetFieldNameAtLevel(i) + "." + SearchDocumentFieldName.SUGGEST.getFieldName())
                                                     .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
                                                     .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
                                                     .field(ElasticSearchReservedWords.ANALYZER.getText(), elasticSearchIndexConfig.getAutoSuggestionAnalyzerName())
-                                                .endObject()
-                                            .endObject()   
-                                        .endObject();
+                                                .endObject();
                              }
                          }
           builder.endObject()
@@ -282,7 +293,6 @@ public class IndexSchemaBuilder
                                  .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
                                  .field(ElasticSearchReservedWords.ANALYZER.getText(), elasticSearchIndexConfig.getAutoSuggestionAnalyzerName())
                              .endObject();
-//                 .endObject();
          return builder;
     }
     

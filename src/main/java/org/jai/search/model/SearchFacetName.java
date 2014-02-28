@@ -33,7 +33,7 @@ public enum SearchFacetName
     public static final String SEARCH_FACET_TYPE_FACET_PREFIX = "searchfacettype_";
     
     //Used to order filters based on sequence order
-    public static final String SEQUENCED_FIELD_SUFFIX = "_sequenced";
+    public static final String SEQUENCED_FIELD_SUFFIX = ".sequenced";
 
     private SearchFacetName(String code)
     {

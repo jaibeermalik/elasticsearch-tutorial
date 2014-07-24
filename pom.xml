@@ -1,15 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.jai</groupId>
-  <artifactId>elasticsearch-tutorial</artifactId>
-  <version>1.0</version>
-  
-  <name>ElasticSearch Tutorial</name>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.jai</groupId>
+	<artifactId>elasticsearch-tutorial</artifactId>
+	<version>1.0-SNAPSHOT</version>
+
+	<name>ElasticSearch Tutorial</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-	
-  <dependencies>
+	</properties>
+	<scm>
+		<developerConnection>scm:git:https://github.com/jaibeermalik/elasticsearch-tutorial</developerConnection>
+	</scm>
+	<dependencies>
 		<dependency>
 			<groupId>org.elasticsearch</groupId>
 			<artifactId>elasticsearch</artifactId>
@@ -94,6 +97,25 @@
 					<configuration>
 						<argLine>-Xmx512m -Xms256m -XX:MaxPermSize=256m</argLine>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.3</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>jar-no-fork</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.5</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

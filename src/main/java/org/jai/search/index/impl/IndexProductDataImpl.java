@@ -262,8 +262,8 @@ public class IndexProductDataImpl implements IndexProductData
         {
             contentBuilder = jsonBuilder().prettyPrint().startObject();
             
-            contentBuilder.field(SearchDocumentFieldName.TITLE.getFieldName(), productGroup.getGroupTitle())
-                          .field(SearchDocumentFieldName.DESCRIPTION.getFieldName(), productGroup.getGroupDescription())
+            contentBuilder.field(SearchDocumentFieldName.TITLEPG.getFieldName(), productGroup.getGroupTitle())
+                          .field(SearchDocumentFieldName.DESCRIPTIONPG.getFieldName(), productGroup.getGroupDescription())
                           ;
             
             contentBuilder.endObject();

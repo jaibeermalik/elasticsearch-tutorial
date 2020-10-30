@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.elasticsearch.common.joda.time.DateTime;
 import org.jai.search.model.Category;
 import org.jai.search.model.Product;
 import org.jai.search.model.ProductGroup;
@@ -31,7 +30,7 @@ public class SampleDataGeneratorImpl implements SampleDataGenerator
             product.setId(Long.valueOf(i));
             product.setTitle("Title " + i);
             product.setDescription("Description" + i);
-            product.setAvailableOn(new DateTime().plusDays(i).toDate());
+            product.setAvailableOn(new org.joda.time.DateTime().plusDays(i).toDate());
             product.addKeyword("Keyword " + i);
             product.setPrice(BigDecimal.valueOf(i));
             product.setSoldOut(i % 2 == 0 ? true : false);

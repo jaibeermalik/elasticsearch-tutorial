@@ -3,9 +3,10 @@ package org.jai.search.test;
 import static org.junit.Assert.assertTrue;
 
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.Requests;
+import org.elasticsearch.cluster.health.ClusterHealthStatus;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.jai.search.client.SearchClientService;
 import org.jai.search.data.SampleDataGenerator;
 import org.jai.search.index.IndexProductData;
@@ -63,11 +64,12 @@ public abstract class AbstractSearchJUnit4SpringContextTests extends AbstractJUn
      
      protected long getIndexTotalDocumentCount(ElasticSearchIndexConfig elasticSearchIndexConfig)
      {
-         long count = searchClientService.getClient().prepareCount(elasticSearchIndexConfig.getIndexAliasName())
+         long count = searchClientService.getClient().prepareSearch(elasticSearchIndexConfig.getIndexAliasName())
                                                      .setTypes(elasticSearchIndexConfig.getDocumentType())
-                                                     .execute()
-                                                     .actionGet()
-                                                     .getCount();
+                                                     .setSource(new SearchSourceBuilder()
+                                                     .size(0))
+                                                     .get().getHits().getTotalHits()
+                                                     ;
          
          return count;
      }

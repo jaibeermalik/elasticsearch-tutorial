@@ -1,17 +1,15 @@
 package org.jai.search.client.impl;
 
-import javax.annotation.PostConstruct;
+import java.net.InetSocketAddress; 
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.jai.search.client.SearchClientService;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.jai.search.model.ElasticSearchReservedWords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 //@Service(value="searchClientService")
 public class SearchClientServiceImpl //implements SearchClientService 
@@ -45,11 +43,11 @@ public class SearchClientServiceImpl //implements SearchClientService
             //Try starting search client at context loading
             try
             {
-                Settings settings = ImmutableSettings.settingsBuilder().put(ElasticSearchReservedWords.CLUSTER_NAME.getText(), searchServerClusterName).build();
+                Settings settings = Settings.builder().put(ElasticSearchReservedWords.CLUSTER_NAME.getText(), searchServerClusterName).build();
                 
-                TransportClient transportClient = new TransportClient(settings);
+                TransportClient transportClient = new PreBuiltTransportClient(settings);
 
-                transportClient = transportClient.addTransportAddress(new InetSocketTransportAddress("localhost", 9300));
+                transportClient = transportClient.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress("localhost", 9300)));
                 
                 if(transportClient.connectedNodes().size() == 0)
                 {
@@ -69,12 +67,12 @@ public class SearchClientServiceImpl //implements SearchClientService
     public void addNewNode(String name)
     {
         TransportClient transportClient = (TransportClient) client;
-        transportClient.addTransportAddress(new InetSocketTransportAddress(name, 9300));
+        transportClient.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress("localhost", 9300)));
     }
     
     public void removeNode(String name)
     {
         TransportClient transportClient = (TransportClient) client;
-        transportClient.removeTransportAddress(new InetSocketTransportAddress(name, 9300));
+        transportClient.removeTransportAddress(new InetSocketTransportAddress(new InetSocketAddress("localhost", 9300)));
     }
 }

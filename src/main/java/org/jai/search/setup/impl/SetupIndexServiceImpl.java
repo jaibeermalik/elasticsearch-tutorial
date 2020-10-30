@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
@@ -31,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
 
 @Service
 public class SetupIndexServiceImpl implements SetupIndexService
@@ -68,10 +70,10 @@ public class SetupIndexServiceImpl implements SetupIndexService
         Date date = new Date();
         String suffixedIndexName = getSuffixedIndexName(config.getIndexAliasName(), date);
         
-        if(isIndexExists(suffixedIndexName))
+        if(isIndexExists(config.getIndexAliasName()))
         {
             //drop existing index
-            deleteIndex(suffixedIndexName);
+            deleteIndex(config.getIndexAliasName());
         }
 
         //create indices
@@ -121,9 +123,9 @@ public class SetupIndexServiceImpl implements SetupIndexService
         
         if(stateResponse !=null && stateResponse.getState() !=null)
         {
-            for (Entry<String, IndexRoutingTable> entry : stateResponse.getState().getRoutingTable().getIndicesRouting().entrySet()) 
+            for (ObjectObjectCursor<String, IndexRoutingTable> entry : stateResponse.getState().getRoutingTable().getIndicesRouting()) 
             {
-                indices.add(entry.getKey());
+                indices.add(entry.key);
             }
         }
         
@@ -218,8 +220,8 @@ public class SetupIndexServiceImpl implements SetupIndexService
     {
         String settingValue = null;
 
-        ClusterStateResponse clusterStateResponse = searchClientService.getClient().admin().cluster().prepareState().setFilterRoutingTable(true)
-                .setFilterNodes(true).setFilterIndices(config.getIndexAliasName()).get();
+        ClusterStateResponse clusterStateResponse = searchClientService.getClient().admin().cluster().prepareState().setRoutingTable(true)
+                .setNodes(true).setIndices(config.getIndexAliasName()).get();
         
         for (IndexMetaData indexMetaData : clusterStateResponse.getState().getMetaData())
         {
@@ -252,7 +254,10 @@ public class SetupIndexServiceImpl implements SetupIndexService
         
         if(tokenFilters !=null)
         {
-            analyzeRequestBuilder.setTokenFilters(tokenFilters);
+        	final Map<String, String> map = new HashMap<String, String>();
+        	for (int i = 0; i < tokenFilters.length; i++)
+        		  map.put(tokenFilters[i], tokenFilters[i]);
+            analyzeRequestBuilder.setTokenizer(map);
         }
         
         logger.debug("Analyze request is text: {}, analyzer: {}, tokenfilters: {}", new Object[]{analyzeRequestBuilder.request().text(), 
@@ -265,9 +270,10 @@ public class SetupIndexServiceImpl implements SetupIndexService
         {
             if(analyzeResponse != null)
             {
-                logger.debug("Analyze response is : {}", analyzeResponse.toXContent(jsonBuilder().startObject(), ToXContent.EMPTY_PARAMS).prettyPrint().string());
+//                logger.debug("Analyze response is : {}", analyzeResponse.toXContent(jsonBuilder().startObject(), ToXContent.EMPTY_PARAMS).prettyPrint().string());
+            	logger.debug("Analyze response is : {}", analyzeResponse);
             }
-        } catch (IOException e)
+        } catch (Exception e)
         {
             logger.error("Error printing response.", e);
         }

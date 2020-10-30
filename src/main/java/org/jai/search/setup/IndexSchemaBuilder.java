@@ -1,6 +1,5 @@
 package org.jai.search.setup;
 
-import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilder;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.io.IOException;
@@ -23,7 +22,7 @@ public class IndexSchemaBuilder
     {
         logger.debug("Generating settings for index: {}", config.getIndexAliasName());
         
-        Settings settings = settingsBuilder().loadFromSource(jsonBuilder()
+        Settings settings = Settings.builder().loadFromSource(jsonBuilder()
                     .startObject()
                         //disable dynamic mapping adding, set it to false 
                         .field(ElasticSearchReservedWords.INDEX_MAPPER_DYNAMIC.getText(), false)
@@ -87,6 +86,7 @@ public class IndexSchemaBuilder
                                 .startObject(config.getAutoSuggestionAnalyzerName())
                                     .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.CUSTOM.getText())
                                     .field(ElasticSearchReservedWords.TOKENIZER.getText(), ElasticSearchReservedWords.KEYWORD.getText())
+//                                    .field(ElasticSearchReservedWords.TOKENIZER.getText(), "letter")
                                     .field(ElasticSearchReservedWords.FILTER.getText(), new String[]{ElasticSearchReservedWords.LOWERCASE.getText()
 //                                                                                config.getNGramTokenFilterName()
                                                                                 })
@@ -135,15 +135,19 @@ public class IndexSchemaBuilder
         {
             builder.startObject(ElasticSearchReservedWords.PROPERTIES.getText());
             //Let it be dynamic for now
-            builder.startObject(SearchDocumentFieldName.TITLE.getFieldName())
-                        .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                        .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
-                        .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+            builder.startObject(SearchDocumentFieldName.TITLEPG.getFieldName())
+                        .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.KEYWORD.getText())
+                        .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
+                        .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
+//                        .field(ElasticSearchReservedWords.ANALYZER.getText(), elasticSearchIndexConfig.getCustomFreeTextAnalyzerName())
+//                        .field(ElasticSearchReservedWords.FIELD_DATA.getText(), ElasticSearchReservedWords.TRUE.getText())
                    .endObject()
-                   .startObject(SearchDocumentFieldName.DESCRIPTION.getFieldName())
-                       .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                       .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
-                       .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+                   .startObject(SearchDocumentFieldName.DESCRIPTIONPG.getFieldName())
+                       .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.KEYWORD.getText())
+                       .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
+                       .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
+//                       .field(ElasticSearchReservedWords.ANALYZER.getText(), elasticSearchIndexConfig.getCustomFreeTextAnalyzerName())
+//                       .field(ElasticSearchReservedWords.FIELD_DATA.getText(), ElasticSearchReservedWords.TRUE.getText())
                    .endObject()
                ;
             
@@ -158,14 +162,14 @@ public class IndexSchemaBuilder
             builder.startObject(ElasticSearchReservedWords.PROPERTIES.getText());
             //Let it be dynamic for now 
             builder.startObject(SearchDocumentFieldName.SIZE.getFieldName())
-                        .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                        .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
-                        .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+                        .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.KEYWORD.getText())
+                        .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
+                        .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
                    .endObject()
                    .startObject(SearchDocumentFieldName.COLOR.getFieldName())
-                       .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                       .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
-                       .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+                       .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.KEYWORD.getText())
+                       .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
+                       .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
                    .endObject();
         }
 //        else
@@ -176,9 +180,9 @@ public class IndexSchemaBuilder
         //end properties
         builder.endObject()
         //end two start ones
-//            .endObject()
+            .endObject()
             .endObject();
-        
+       // System.out.println(builder.string());
         logger.debug("Generated mapping for document type {} is: {}", new Object[]{elasticSearchIndexConfig, builder.prettyPrint().string()});
         return builder;
     }
@@ -188,14 +192,14 @@ public class IndexSchemaBuilder
         builder.startObject(SearchDocumentFieldName.SPECIFICATIONS.getFieldName())
                     .startObject(ElasticSearchReservedWords.PROPERTIES.getText())
                         .startObject(SearchDocumentFieldName.RESOLUTION.getFieldName())
-                           .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                           .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
-                           .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
+                           .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.KEYWORD.getText())
+                           .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
+                           .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
                         .endObject()
                         .startObject(SearchDocumentFieldName.MEMORY.getFieldName())
-                           .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                           .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
-                           .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
+                           .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.KEYWORD.getText())
+                           .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
+                           .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
                         .endObject()
                     .endObject()
                     .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.NESTED.getText())
@@ -207,8 +211,8 @@ public class IndexSchemaBuilder
         //standard fields
         builder.startObject(SearchDocumentFieldName.SOLD_OUT.getFieldName())
                    .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.BOOLEAN.getText())
-                   .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
-                   .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
+                   .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
+                   .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
                .endObject();
     }
     
@@ -217,8 +221,8 @@ public class IndexSchemaBuilder
         builder.startObject(SearchDocumentFieldName.AVAILABLE_DATE.getFieldName())
                 .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.DATE.getText())
                 .field(ElasticSearchReservedWords.FORMAT.getText(), SearchDateUtils.SEARCH_DATE_FORMAT_YYYY_MM_DD_T_HH_MM_SSSZZ)
-                .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
-                .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+                .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
+                .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
             .endObject();
     }
     
@@ -226,8 +230,8 @@ public class IndexSchemaBuilder
     {
         builder.startObject(SearchDocumentFieldName.BOOSTFACTOR.getFieldName())
                     .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.FLOAT.getText())
-                    .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
-                    .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+                    .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
+                    .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
                .endObject();
     }
     
@@ -236,7 +240,7 @@ public class IndexSchemaBuilder
         //Add out of stock information
          builder.startObject(SearchDocumentFieldName.PRICE.getFieldName())
                  .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.DOUBLE.getText())
-                 .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+                 .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
                  .endObject()
               ;
     }
@@ -245,19 +249,24 @@ public class IndexSchemaBuilder
     {
           //content information fields
           builder.startObject(SearchDocumentFieldName.TITLE.getFieldName())
-                     .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                     .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
+                     .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.TEXT.getText())
+                     .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
+                     .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
                      .field(ElasticSearchReservedWords.ANALYZER.getText(), elasticSearchIndexConfig.getCustomFreeTextAnalyzerName())
+                     .field(ElasticSearchReservedWords.FIELD_DATA.getText(), ElasticSearchReservedWords.TRUE.getText())
                  .endObject()
                  .startObject(SearchDocumentFieldName.DESCRIPTION.getFieldName())
-                     .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                     .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
+                     .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.TEXT.getText())
+                     .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
+                     .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
                      .field(ElasticSearchReservedWords.ANALYZER.getText(), elasticSearchIndexConfig.getCustomFreeTextAnalyzerName())
+                     .field(ElasticSearchReservedWords.FIELD_DATA.getText(), ElasticSearchReservedWords.TRUE.getText())
                  .endObject()
                  
                  //Add content categories mapping
                  .startObject(SearchDocumentFieldName.CATEGORIES_ARRAY.getFieldName())
-                     .startObject(ElasticSearchReservedWords.PROPERTIES.getText());
+                 	.field(ElasticSearchReservedWords.TYPE.getText(), "nested")
+                 	.startObject(ElasticSearchReservedWords.PROPERTIES.getText());
                          //Add each category facet
                          for (SearchFacetName facetName : SearchFacetName.categoryFacetValues())
                          {
@@ -266,22 +275,24 @@ public class IndexSchemaBuilder
                              {
                                  builder
                                  .startObject(facetName.getFacetSequencedFieldNameAtLevel(i))
-                                             .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                                             .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+                                             .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.KEYWORD.getText())
+                                             .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
                                          .endObject()
                                                 .startObject(facetName.getFacetFieldNameAtLevel(i) + "." + SearchDocumentFieldName.FACET.getFieldName())
-                                                    .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                                                    .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
-                                                    .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+                                                    .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.KEYWORD.getText())
+                                                    .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
+                                                    .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
                                                 .endObject()
                                                 .startObject(facetName.getFacetFieldNameAtLevel(i) + "." + SearchDocumentFieldName.FACETFILTER.getFieldName())
-                                                    .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                                                    .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.NOT_ANALYZED.getText())
+                                                    .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.KEYWORD.getText())
+                                                    .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
                                                 .endObject()
                                                 .startObject(facetName.getFacetFieldNameAtLevel(i) + "." + SearchDocumentFieldName.SUGGEST.getFieldName())
-                                                    .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                                                    .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
+                                                    .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.TEXT.getText())
+                                                    .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
+                                                    .field(ElasticSearchReservedWords.INDEX.getText(), ElasticSearchReservedWords.TRUE.getText())
                                                     .field(ElasticSearchReservedWords.ANALYZER.getText(), elasticSearchIndexConfig.getAutoSuggestionAnalyzerName())
+                                                    .field(ElasticSearchReservedWords.FIELD_DATA.getText(), ElasticSearchReservedWords.TRUE.getText())
                                                 .endObject();
                              }
                          }
@@ -289,8 +300,8 @@ public class IndexSchemaBuilder
                  .endObject()
                  //Add keywords mapping
                              .startObject(SearchDocumentFieldName.KEYWORDS.getFieldName())
-                                 .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.STRING.getText())
-                                 .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.YES.getText())
+                                 .field(ElasticSearchReservedWords.TYPE.getText(), ElasticSearchReservedWords.COMPLETION.getText())
+//                                 .field(ElasticSearchReservedWords.STORE.getText(), ElasticSearchReservedWords.TRUE.getText())
                                  .field(ElasticSearchReservedWords.ANALYZER.getText(), elasticSearchIndexConfig.getAutoSuggestionAnalyzerName())
                              .endObject();
          return builder;

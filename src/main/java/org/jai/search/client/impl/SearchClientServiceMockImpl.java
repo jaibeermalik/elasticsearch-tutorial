@@ -1,23 +1,22 @@
 package org.jai.search.client.impl;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilder;
-import static org.elasticsearch.common.settings.ImmutableSettings.Builder.EMPTY_SETTINGS;
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.network.NetworkUtils;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
+import org.elasticsearch.node.NodeValidationException;
 import org.jai.search.client.SearchClientService;
 import org.jai.search.model.ElasticSearchReservedWords;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 @Service(value="searchClientService")
@@ -27,35 +26,41 @@ public class SearchClientServiceMockImpl implements SearchClientService
 
     private Map<String, Client> clients = newHashMap();
 
-    private Settings defaultSettings = ImmutableSettings
-            .settingsBuilder()
-            .put(ElasticSearchReservedWords.CLUSTER_NAME.getText(), "test-cluster-" + NetworkUtils.getLocalAddress().getHostName())
+    private Settings defaultSettings = Settings.builder()
+            
+            .put(ElasticSearchReservedWords.CLUSTER_NAME.getText(), "test-cluster-localhost-" + UUID.randomUUID())
             //data dir, other node dir for lock etc will still be created
+            .put("path.home", new File(System.getProperty("java.io.tmpdir") + "/esintegrationtest").getAbsolutePath())
             .put(ElasticSearchReservedWords.PATH_DATA.getText(), new File(System.getProperty("java.io.tmpdir") + "/esintegrationtest/data").getAbsolutePath())
-            .put(ElasticSearchReservedWords.PATH_WORK.getText(), new File(System.getProperty("java.io.tmpdir") + "/esintegrationtest/work").getAbsolutePath())
+//            .put(ElasticSearchReservedWords.PATH_WORK.getText(), new File(System.getProperty("java.io.tmpdir") + "/esintegrationtest/work").getAbsolutePath())
             .put(ElasticSearchReservedWords.PATH_LOG.getText(), new File(System.getProperty("java.io.tmpdir") + "/esintegrationtest/log").getAbsolutePath())
             .put(ElasticSearchReservedWords.PATH_CONF.getText(), new File("config").getAbsolutePath())
             
             //will not survive restart
             //TODO: memory store type cause out of memory in eclipse on low config machine
             // Check how to set memory setting and allocations in memory store type.
-            .put("index.store.type", "memory")
+            .put("index.store.type", "mmapfs")
             .build();
 
     @PostConstruct
     public void createNodes() throws Exception {
-        Settings settings = settingsBuilder().put(ElasticSearchReservedWords.NUMBER_OF_SHARDS.getText(), 3)
-                .put(ElasticSearchReservedWords.NUMBER_OF_REPLICAS.getText(), 1)
+        Settings settings = Settings.builder()
+//        		.put(ElasticSearchReservedWords.NUMBER_OF_SHARDS.getText(), 3)
+//                .put(ElasticSearchReservedWords.NUMBER_OF_REPLICAS.getText(), 1)
 //                .put(ElasticSearchReservedWords.INDEX_MAPPER_DYNAMIC.getText(), false)
                 .build();
         startNode("server1", settings);
-        startNode("server2", settings);
+//        startNode("server2", settings);
     }
 
 //    @PreDestroy
     public void closeNodes() {
         getClient().close();
-        closeAllNodes();
+        try {
+			closeAllNodes();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
     
     public Client getClient() {
@@ -65,14 +70,23 @@ public class SearchClientServiceMockImpl implements SearchClientService
 //    @Override
     public void addNewNode(String name)
     {
-        buildNode(name);
-        startNode(name);
+        try {
+			buildNode(name);
+			startNode(name);
+		} catch (IOException | NodeValidationException e) {
+			e.printStackTrace();
+		}
+        
     }
     
 //    @Override
     public void removeNode(String nodeName)
     {
-        closeNode(nodeName);
+        try {
+			closeNode(nodeName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
     
     public void putDefaultSettings(Settings.Builder settings) {
@@ -80,56 +94,65 @@ public class SearchClientServiceMockImpl implements SearchClientService
     }
 
     public void putDefaultSettings(Settings settings) {
-        defaultSettings = ImmutableSettings.settingsBuilder().put(defaultSettings).put(settings).build();
+        defaultSettings = Settings.builder().put(defaultSettings).put(settings).build();
     }
 
-    public Node startNode(String id) {
+    public Node startNode(String id) throws NodeValidationException, IOException {
         return buildNode(id).start();
     }
 
-    public Node startNode(String id, Settings.Builder settings) {
+    public Node startNode(String id, Settings.Builder settings) throws NodeValidationException, IOException {
         return startNode(id, settings.build());
     }
 
-    public Node startNode(String id, Settings settings) {
+    public Node startNode(String id, Settings settings) throws NodeValidationException, IOException {
         return buildNode(id, settings).start();
     }
 
-    public Node buildNode(String id) {
-        return buildNode(id, EMPTY_SETTINGS);
+    public Node buildNode(String id) throws IOException {
+        return buildNode(id, Settings.EMPTY);
     }
 
-    public Node buildNode(String id, Settings.Builder settings) {
+    public Node buildNode(String id, Settings.Builder settings) throws IOException {
         return buildNode(id, settings.build());
     }
 
-    public Node buildNode(String id, Settings settings) {
+    public Node buildNode(String id, Settings settings) throws IOException {
         String settingsSource = getClass().getName().replace('.', '/') + ".yml";
-        Settings finalSettings = settingsBuilder()
-                .loadFromClasspath(settingsSource)
+        Settings finalSettings = Settings.builder()
+//                .loadFromPath(Paths.get(new ClassPathResource(settingsSource).getPath()))
                 .put(defaultSettings)
                 .put(settings)
-                .put("name", id)
+                .put("node.name", id)
+                .put("transport.type", "local")
+                .put("http.enabled", false) 
+                .put("node.max_local_storage_nodes", 2) 
+//                .put("script.engine.groovy.inline.update", true)
+                .put("script.inline", true)
+                .put("script.stored", true)
+                .put("script.update", true)
+//                .put("script.engine.painless.inline.update", true)
+//                .put("script.engine.painless.inline", true)
+//                .put("script.plugin", true)
+                
                 .build();
 
         if (finalSettings.get("gateway.type") == null) {
             // default to non gateway
-            finalSettings = settingsBuilder().put(finalSettings).put("gateway.type", "none").build();
+//            finalSettings = Settings.builder().put(finalSettings).put("gateway.type", "local").build();
         }
         if (finalSettings.get("cluster.routing.schedule") != null) {
             // decrease the routing schedule so new nodes will be added quickly
-            finalSettings = settingsBuilder().put(finalSettings).put("cluster.routing.schedule", "50ms").build();
+            finalSettings = Settings.builder().put(finalSettings).put("cluster.routing.schedule", "50ms").build();
         }
 
-        Node node = nodeBuilder()
-                .settings(finalSettings)
-                .build();
+        Node node = new Node(finalSettings);
         nodes.put(id, node);
         clients.put(id, node.client());
         return node;
     }
 
-    public void closeNode(String id) {
+    public void closeNode(String id) throws IOException {
         Client client = clients.remove(id);
         if (client != null) {
             client.close();
@@ -148,7 +171,7 @@ public class SearchClientServiceMockImpl implements SearchClientService
         return clients.get(id);
     }
 
-    public void closeAllNodes() {
+    public void closeAllNodes() throws IOException {
         for (Client client : clients.values()) {
             client.close();
         }

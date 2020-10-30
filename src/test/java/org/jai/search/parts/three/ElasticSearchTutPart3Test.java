@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jai.search.model.ElasticSearchIndexConfig;
@@ -151,6 +152,8 @@ public class ElasticSearchTutPart3Test extends AbstractSearchJUnit4SpringContext
         //Update synonyms search, find => query
         description = description + " search";
         product.setDescription(description);
+        if(product.getKeywords() == null) product.setKeywords(new ArrayList<>());
+		product.getKeywords().add("pkey");
         indexProductData.indexProduct(config, product);
         
         refreshSearchServer();
@@ -183,6 +186,8 @@ public class ElasticSearchTutPart3Test extends AbstractSearchJUnit4SpringContext
         searchCriteria.indices(config.getIndexAliasName());
         searchCriteria.documentTypes(config.getDocumentType());
         
+        
+        
         String stopword = "however";
         searchCriteria.query(stopword);
         Product product = productQueryService.getProduct(config, 1l);
@@ -194,9 +199,13 @@ public class ElasticSearchTutPart3Test extends AbstractSearchJUnit4SpringContext
         String description = product.getDescription();
         assertEquals("Description"+ product.getId(), description);
         
+        
+        
         //Update stop_en_EN however
         description = description + " " + stopword;
         product.setDescription(description);
+		if(product.getKeywords() == null) product.setKeywords(new ArrayList<>());
+		product.getKeywords().add("pkey");
         indexProductData.indexProduct(config, product);
         
         refreshSearchServer();
@@ -232,6 +241,8 @@ public class ElasticSearchTutPart3Test extends AbstractSearchJUnit4SpringContext
         //Update html content
         description = description + " " + "<div><p>This contains html content</p><div><br/>";
         product.setDescription(description);
+        if(product.getKeywords() == null) product.setKeywords(new ArrayList<>());
+		product.getKeywords().add("pkey");
         indexProductData.indexProduct(config, product);
         
         refreshSearchServer();

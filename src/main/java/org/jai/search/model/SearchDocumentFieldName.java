@@ -6,7 +6,9 @@ public enum SearchDocumentFieldName
 {
     BOOSTFACTOR("boostfactor"),
     TITLE("title"),
+    TITLEPG("titlepg"),
     DESCRIPTION("description"),
+    DESCRIPTIONPG("descriptionpg"),
     AVAILABLE_DATE("availabledate"),
     SOLD_OUT("soldout"),
     KEYWORDS("keywords"),
@@ -40,7 +42,7 @@ public enum SearchDocumentFieldName
         PRICE.getFieldName(),
         KEYWORDS.getFieldName(),
         BOOSTFACTOR.getFieldName(),
-        CATEGORIES_ARRAY.getFieldName(),
+        CATEGORIES_ARRAY.getFieldName() + ".",
     };
 
     private String fieldName;

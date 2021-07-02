@@ -8,7 +8,7 @@
 	<name>ElasticSearch Tutorial</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<es.version>5.1.2</es.version>
+		<es.version>6.8.15</es.version>
 		<spring.version>4.3.6.RELEASE</spring.version>
 	</properties>
 	<scm>
